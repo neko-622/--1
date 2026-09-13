@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能物流搬运 · 电控固件 Code Wiki</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --panel:#ffffff; --line:#e3e8ef; --text:#1f2733; --muted:#6b7684;
+    --brand:#0e8a6d; --brand-dark:#0a6f58; --accent:#1f6feb; --code-bg:#0f172a;
+    --tag:#e7f5f0; --tag-text:#0a6f58; --warn:#b45309;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;font-family:"Microsoft YaHei","PingFang SC","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* 侧边导航 */
+  .sidebar{position:fixed;top:0;left:0;width:264px;height:100vh;background:#0f172a;color:#cbd5e1;overflow-y:auto;padding:20px 12px;z-index:10;}
+  .sidebar h1{font-size:15px;color:#fff;margin:0 0 4px;line-height:1.4;}
+  .sidebar .sub{font-size:12px;color:#7c8aa0;margin-bottom:18px;}
+  .sidebar a{display:block;color:#aab6ca;padding:7px 12px;border-radius:6px;font-size:13px;margin:1px 0;}
+  .sidebar a:hover{background:#1e293b;color:#fff;text-decoration:none;}
+  .sidebar .grp{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin:16px 6px 6px;font-weight:700;}
+
+  .content{margin-left:264px;padding:34px 48px 90px;max-width:1080px;}
+
+  .hero{background:linear-gradient(135deg,#0e8a6d,#0aa88a);color:#fff;border-radius:14px;padding:30px 34px;margin-bottom:30px;}
+  .hero h2{margin:0 0 8px;font-size:24px;}
+  .hero p{margin:4px 0;opacity:.92;font-size:14px;}
+
+  h2.sec{border-bottom:2px solid var(--brand);padding-bottom:8px;font-size:21px;margin:44px 0 16px;}
+  h2.sec .no{color:var(--brand);font-family:ui-monospace,monospace;margin-right:8px;}
+  h3{font-size:16px;margin-top:26px;}
+  p{margin:10px 0;}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;}.content{margin-left:0;padding:20px 16px;}.sidebar{display:none;}}
+
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  th{background:#f1f5f9;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:600;}
+  td{padding:9px 12px;border-bottom:1px solid #eef1f6;vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  th:nth-child(1){width:200px;}
+
+  code,.mono{font-family:ui-monospace,"JetBrains Mono","Cascadia Code",Consolas,monospace;}
+  code.inline{background:#eef2f7;border-radius:4px;padding:1px 6px;font-size:12.5px;color:#b45309;}
+  pre{background:var(--code-bg);color:#d5e3ff;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:12.8px;line-height:1.6;}
+  pre code{font-family:ui-monospace,Consolas,monospace;}
+
+  .tag{display:inline-block;background:var(--tag);color:var(--tag-text);border-radius:20px;font-size:11.5px;padding:1px 9px;margin:1px 3px 1px 0;}
+  .tag.blue{background:#e7f0ff;color:#1f5fc4;}
+  .tag.amber{background:#fff4e0;color:#9a6700;}
+  .tag.gray{background:#eef1f6;color:#5b6572;}
+
+  .boxed{background:#f8fafc;border-left:4px solid var(--brand);padding:10px 14px;border-radius:6px;margin:12px 0;font-size:13.5px;}
+  .boxed.warn{border-left-color:var(--warn);background:#fffaf0;}
+
+  ul.tight{margin:8px 0;padding-left:22px;}
+  ul.tight li{margin:5px 0;font-size:14px;}
+
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0;font-size:12.5px;}
+  .flow .node{background:#0e8a6d;color:#fff;padding:6px 10px;border-radius:6px;font-weight:600;}
+  .flow .node.dark{background:#334155;}
+  .flow .node.accent{background:#1f6feb;}
+  .flow .arrow{color:#64748b;font-weight:700;}
+
+  .func{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:10px 0;}
+  .func .name{font-family:ui-monospace,monospace;font-weight:700;color:#0f172a;font-size:13.5px;}
+  .func .sig{color:#e11d48;font-size:12.5px;font-family:ui-monospace,monospace;margin-left:8px;}
+  .func p{margin:4px 0 0;font-size:13px;color:#475569;}
+  .func .meta{font-size:12px;color:var(--muted);margin-top:4px;}
+
+  .kbd{background:#eef2f7;border:1px solid #d5dce6;border-bottom-width:2px;border-radius:5px;padding:1px 6px;font-size:12px;font-family:ui-monospace,monospace;}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <h1>智能物流搬运<br>电控固件 Code Wiki</h1>
+  <div class="sub">STM32F407 · FreeRTOS · Keil</div>
+  <a href="#overview">1. 项目总览</a>
+  <a href="#arch">2. 系统架构</a>
+  <a href="#module">3. 目录结构与模块职责</a>
+  <a href="#tasks">4. FreeRTOS 任务与调度</a>
+  <a href="#structs">5. 关键数据结构</a>
+  <a href="#funcs">6. 核心函数说明</a>
+  <a href="#comms">7. 通信接口与协议</a>
+  <a href="#irq">8. 中断与 DMA 机制</a>
+  <a href="#dep">9. 依赖关系</a>
+  <a href="#flow">10. 比赛作业流程</a>
+  <a href="#version">11. 版本历史</a>
+  <a href="#build">12. 构建与运行</a>
+</nav>
+
+<main class="content">
+
+  <div class="hero">
+    <h2>2025 智能物流搬运 · 电控固件 Code Wiki</h2>
+    <p>代码库：<code class="mono" style="opacity:.85">Logistics_Vehicle_F407_V2.7.4_OpenSource</code></p>
+    <p>MCU：STM32F407VETx（Cortex-M4 @168MHz） · RTOS：FreeRTOS (CMSIS-RTOS v2) · IDE：Keil MDK-ARM (UV5)</p>
+    <p>学校：XAUT（西安理工大学） · 功能：物流车底盘 + 塔吊式抓取机构 + 视觉定位 全自动/遥控作业</p>
+  </div>
+
+  <!-- 1 总览 -->
+  <h2 class="sec" id="overview"><span class="no">01</span>项目总览</h2>
+  <div class="card">
+    <p>本项目是针对「智能物流搬运」赛项开发的物流小车车载下位机固件，运行在 <strong>STM32F407</strong> 主控板上。车辆的机械部分由 <strong>麦轮移动底盘</strong> 与一套 <strong>塔吊式抓取机构</strong>（偏航旋转 + 升降 + 吊臂伸缩 + 夹爪）构成；电控部分以本固件为核心，协调各路传感器、执行机构与外部视觉设备。</p>
+    <p>系统可工作在两种模式：</p>
+    <ul class="tight">
+      <li><span class="tag">自动模式</span> control_mode = 0：按 Main_task 中预设的 预赛/决赛 流程自主完成「出库 → 扫码取任务 → 抓取/放置物料 → 码垛/转盘放置」。</li>
+      <li><span class="tag">遥控模式</span> control_mode = 1：由遥控器（DMA 串口）接管底盘与塔吊，进行调试/人工干预。拨杆 L1 切换接管、按键 L1 <code class="inline">NVIC_SystemReset()</code> 远程复位、L2 跳过初始化。</li>
+    </ul>
+    <div class="boxed"><b>核心能力：</b>绝对坐标场地定位（OPS）、二维码/色环/物料/物料盘视觉识别（Nano + 视觉指令协作）、麦轮运动学底盘闭环、3 轴塔吊运动控制与抓取动作序列。</div>
+  </div>
+
+  <!-- 2 架构 -->
+  <h2 class="sec" id="arch"><span class="no">02</span>系统架构</h2>
+  <h3>硬件/子系统总览</h3>
+  <div class="flow" style="justify-content:flex-start;">
+    <span class="node">主控 STM32F407</span>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <b>底盘执行链</b>
+      <div class="flow"><span class="node dark">MCU</span><span class="arrow">——UART4 指令——▶</span><span class="node">4×42步进电机驱动器</span></div>
+      <div class="flow"><span class="node dark">OPS 定位</span><span class="arrow">——UART2 位姿——▶</span><span class="node">位置环闭环</span></div>
+      <p style="font-size:12.5px">麦轮底盘：4 个 42 闭环步进电机，端口组驱动，全向移动。</p>
+    </div>
+    <div class="card">
+      <b>塔吊执行链</b>
+      <div class="flow"><span class="node dark">MCU</span><span class="arrow">——CAN1——▶</span><span class="node">G6220 偏航</span></div>
+      <div class="flow"><span class="node dark">MCU</span><span class="arrow">——CAN1——▶</span><span class="node">28/35 步进</span><span class="arrow">——▶</span><span class="node">吊臂/升降</span></div>
+      <div class="flow"><span class="node dark">MCU</span><span class="arrow">——TIM1~PWM——▶</span><span class="node">MG90 夹爪舵机</span></div>
+    </div>
+    <div class="card">
+      <b>视觉感知链</b>
+      <div class="flow"><span class="node dark">MCU</span><span class="arrow">——USART1 指令——▶</span><span class="node">Nano 视觉</span><span class="arrow">——◀ 结果 ——</span></div>
+      <p style="font-size:12.5px">二维码/红绿蓝物料/色环/物料盘 识别，结果写回 <code class="inline">VIS_RX</code>。</p>
+    </div>
+    <div class="card">
+      <b>人机交互</b>
+      <div class="flow"><span class="node dark">遥控器</span><span class="arrow">——UART5——▶</span><span class="node">RC 接收机</span></div>
+      <div class="flow"><span class="node dark">MCU</span><span class="arrow">——SPI/软SPI——▶</span><span class="node">双 OLED</span></div>
+      <p style="font-size:12.5px">LED×3、蜂鸣器、摄像头补光灯、启动按键、电机总开关(VM_SW)。</p>
+    </div>
+  </div>
+
+  <h3>软件分层</h3>
+  <table>
+    <tr><th>层</th><th>内容</th><th>目录</th></tr>
+    <tr><td>应用编排层</td><td>比赛流程（预赛/决赛）、任务状态机、动作序列</td><td><code class="inline">RTOS_APP/Main_task</code></td></tr>
+    <tr><td>任务控制层</td><td>底盘控制环、塔吊控制环、显示输出、串口接收分发</td><td><code class="inline">RTOS_APP</code></td></tr>
+    <tr><td>中间件/驱动封装</td><td>电机/塔吊封装、运动学解算、视觉指令、位姿解算、OLED、I/O</td><td><code class="inline">USER_Code</code></td></tr>
+    <tr><td>RTOS</td><td>FreeRTOS + CMSIS-RTOS v2 适配、队列、内存堆 heap_4</td><td><code class="inline">Middlewares</code></td></tr>
+    <tr><td>HAL/底层</td><td>CubeMX 生成的 HAL 启动、时钟、外设、中断向量</td><td><code class="inline">Core · Drivers</code></td></tr>
+  </table>
+
+  <!-- 3 模块 -->
+  <h2 class="sec" id="module"><span class="no">03</span>目录结构与模块职责</h2>
+  <pre><code>Logistics_Vehicle_F407_V2.7.4_OpenSource/
+├─ Core/                  STM32CubeMX 生成代码
+│  ├─ Inc/  Src/          main.c · freertos.c · 外设(gpio/can/i2c/spi/tim/usart/dma) · 中断 it.c
+├─ Drivers/               CMSIS + STM32F4xx HAL 驱动（厂商代码）
+├─ MDK-ARM/               Keil 工程 (uvprojx) / 启动文件 startup_stm32f407xx.s
+├─ Middlewares/Third_Party/FreeRTOS   RTOS 内核源码
+├─ RTOS_APP/  ── 应用任务层
+│  ├─ Main_task.c/.h      主编排任务：初始化、扫码取任务、预赛/决赛流程控制
+│  ├─ Chassis_task.c/.h   底盘任务：场地位移控制、视觉微调、位置/速度闭环
+│  ├─ Tower_task.c/.h     塔吊任务：塔吊电机闭环 + 全部抓取/放置动作函数
+│  └─ Output_task.c/.h    输出任务：OLED 状态显示、就绪倒计时
+└─ USER_Code/  ── 二次开发驱动层
+   ├─ chassis_control.c/.h   麦轮运动学、底盘/视觉微调 P 控制、电机调速输出
+   ├─ position.c/.h          OPS 位姿解算 / 坐标复位 / 坐标上传(ACTX/Y/J)
+   ├─ Remote_Control_RX.c/.h 遥控器数据解包 → RC_DATA
+   ├─ io_devices.c/.h        LED / 蜂鸣器 / 补光灯 / 电机总开关 宏与闪烁
+   ├─ OLED_SPI(S) 与 oledfont 双套 OLED 驱动 + 软SPI版本
+   ├─ delay_us.c/.h          微秒延时
+   ├─ tower/  tower.c/.h 塔吊电机控制(G6220/28/35) · hcan.c/.h CAN 收发封装
+   └─ Visual_Identity/visual_identity.c/.h  Nano 视觉指令 + 数据解包</code></pre>
+
+  <div class="boxed"><b>注意：两套 OLED。</b> <code class="inline">Output_task</code> 使用硬件 SPI1 的 OLED（SPI_OLED）；<code class="inline">Main_task</code> 用 GPIO 位模拟的软 SPI OLED（SoftSPI_OLED），二者引脚共用/相近，Pre-main 只初始化各自所需。</div>
+
+  <!-- 4 任务 -->
+  <h2 class="sec" id="tasks"><span class="no">04</span>FreeRTOS 任务与调度</h2>
+  <p>任务在 <code class="inline">freertos.c</code> 的 <code class="inline">MX_FREERTOS_Init()</code> 中创建，伴随 3 条串口接收消息队列。</p>
+  <table>
+    <tr><th>任务</th><th>优先级</th><th>栈(字)</th><th>入口 → 实际运行</th><th>职责</th></tr>
+    <tr><td>UART_RX_TASK</td><td>AboveNormal</td><td>256×4</td><td>UART_RX_Task → <code class="inline">UART_RX_Task()</code></td><td>从 3 条队列取指针，分发解包（OPS/RC/Nano）</td></tr>
+    <tr><td>CHASSIS_TASK</td><td>Normal</td><td>128×4</td><td>Chassis_Task → <code class="inline">Chassis_task()</code></td><td>底盘电机控制环（每 ~5ms）</td></tr>
+    <tr><td>TOWER_TASK</td><td>Normal1</td><td>128×4</td><td>Tower_Task → <code class="inline">Tower_task()</code></td><td>塔吊三轴电机控制环（每 ~10ms）</td></tr>
+    <tr><td>defaultTask</td><td>Normal</td><td>128×4</td><td>StartDefaultTask</td><td>占位空任务</td></tr>
+    <tr><td>MAIN_TASK</td><td>BelowNormal</td><td>256×4</td><td>Main_Task → <code class="inline">Main_task()</code></td><td>比赛编排：其阻塞等待动作序列完成，得以调度其他任务</td></tr>
+    <tr><td>OUTPU_TASK</td><td>Low</td><td>128×4</td><td>Output_Task → <code class="inline">Output_task()</code></td><td>OLED 状态显示、就绪倒计时</td></tr>
+  </table>
+  <div class="boxed"><b>协调机制：</b>任务间主要通过 <strong>全局状态标志</strong> 与 <strong>共享结构体</strong> 协作（非消息队列），例如 <code class="inline">ready / chassis_mode / control_mode / in_pos / near_pos / v_in_pos / SpeedTarget[4] / VIS_RX</code>。串口中断→ DMA 缓冲 → 队列 → UART_RX_TASK 解包 → 供各任务读取，是主要的事件传递路径。</div>
+
+  <!-- 5 数据结构 -->
+  <h2 class="sec" id="structs"><span class="no">05</span>关键数据结构</h2>
+
+  <div class="func"><div class="name">struct RC_DATA <span class="sig">Remote_Control_RX.h</span></div>
+    <p>遥控器状态。两摇杆 <code class="inline">LX LY RX RY</code>、两旋钮 <code class="inline">KNOB_L/R</code>、四按键、四拨杆，均 int8_t。<code class="inline">RC_CONNECT_FLAG</code> 连接标志。</p>
+    <p class="meta">经 <code class="inline">RC_Data_Unpack()</code> 从 UART5 帧 <code class="inline">[FA][..][FB]</code> 填充；拨杆 L1 → control_mode。</p>
+  </div>
+
+  <div class="func"><div class="name">struct VISUAL_DATA <span class="sig">visual_identity.h</span></div>
+    <p>Nano 视觉返回数据。三色物料坐标（r/g/b_block_x/y）、色环 <code class="inline">rgb_circle_x/y/z</code>（z=左减右，用于偏航）、物料盘中心 <code class="inline">tray_center_x/y</code>、<code class="inline">block_grab</code> 抓取指令、<code class="inline">block_order</code> 决赛摆放顺序。全部 <code class="inline">short</code>。</p>
+    <p class="meta">全局实例 <code class="inline">VIS_RX</code>，由 <code class="inline">NANO_Data_Unpack()</code> 逐 case 填充。</p>
+  </div>
+
+  <div class="func"><div class="name">globals in main.c <span class="sig">共享的全局状态</span></div>
+    <p><code class="inline">pos_x / pos_y / zangle / xangle / yangle / w_z</code>：OPS 位姿（元/度/角速度）；<code class="inline">SpeedTarget[4]</code>：四电机目标速度；<code class="inline">color_task[6]</code>：6 个任务位（预赛 3 轮 ×2 / 决赛两轮），由 OPENMV 或 二维码填充；<code class="inline">circle_x/y[3]</code>：色环基准坐标。</p>
+  </div>
+
+  <div class="func"><div class="name">UARTx_RX_TypeDef <span class="sig">main.h</span> · struct Finish_Flag <span class="sig">tower.h</span></div>
+    <p>前：DMA 接收缓冲结构（<code class="inline">buffer[] + size</code>），3 个串口各配 5 份环形缓冲。后：塔吊三电机初始化完成标志 <code class="inline">MOTOR35_flag / MOTOR28_flag / G6220_flag</code>，由 CAN 反馈回写。</p>
+  </div>
+
+  <!-- 6 函数 -->
+  <h2 class="sec" id="funcs"><span class="no">06</span>核心函数说明</h2>
+
+  <h3>主编排 Main_task.c</h3>
+  <div class="func"><div class="name">void Main_init() <span class="sig">void</span></div>
+    <p>初始化软SPI OLED、清屏、显示方向，进入 <code class="inline">visual_idle()</code>，并复位 OPS 坐标 <code class="inline">pos_reset()</code>。</p></div>
+  <div class="func"><div class="name">void Get_Task_Code() <span class="sig">void</span></div>
+    <p>扫描阶段循环调用 <code class="inline">identify_QR_code()</code> 直到 <code class="inline">color_task[0]+color_task[5]!=0</code>；带超时（80 次）无结果时切换二维码朝向 <code class="inline">d_X</code> 以改变视角；完成后 <code class="inline">visual_idle()</code> 并清零底盘逼近量。</p></div>
+  <div class="func"><div class="name">void CRing_Dual_Calibration() <span class="sig">void</span></div>
+    <p>色环双重校准：先 <code class="inline">Chassis_Visual_Pos(4,…)</code> 粗校准 + <code class="inline">identify_posture()</code>，再 <code class="inline">Chassis_Visual_Pos(2,…)</code> 精校准，最终保证底盘对位精度。</p></div>
+  <div class="func"><div class="name">void Main_task() <span class="sig">void</span></div>
+    <p>比赛主流程。初始化→显示版本→等待 <code class="inline">ready</code>→蜂鸣→复位位姿→等启动按键→置 <code class="inline">chassis_mode=1</code>。随后按 <code class="inline">#ifdef __PRELIMINARY_ROUND__</code> 编译分支执行 <strong>预赛</strong> 或 <strong>决赛</strong> 两轮流程，每轮都以上一组固定路径点（物品台→粗加工→码垛区→转盘）串起所有抓取/放置动作，结束下令 <code class="inline">chassis_mode=2</code> 停机。<code class="inline">PRE</code> 默认预赛代码。</p></div>
+
+  <h3>底盘任务与运动学 Chassis_task.c / chassis_control.c</h3>
+  <div class="func"><div class="name">void Chassis_Go_Pos(x,y,z,precise,delay) <span class="sig">void</span></div>
+    <p>阻塞式场地定位。写目标并置场地环；按 <code class="inline">precise</code> 等待 <code class="inline">near_pos</code>(接近) 或 <code class="inline">in_pos</code>(就位)，随后按需延时。</p></div>
+  <div class="func"><div class="name">void Chassis_Visual_Pos(target,x,y,z,delay) <span class="sig">void</span></div>
+    <p>视觉定位子流程。<code class="inline">chassis_mode=2</code> 解除场地环，关电机，向 Nano 请求对应目标（物料盘/色环/码垛色环/粗校准），循环直至收到数据，再用 <code class="inline">visual_pos_adj()</code> 闭环，<code class="inline">v_in_pos</code> 就位后蜂鸣复位。</p></div>
+  <div class="func"><div class="name">void chassis_move(x,y,z) <span class="sig">void</span></div>
+    <p>麦轮位置环。由 OPS 位姿计算 <code class="inline">devx/devy/devz</code>，经 cos/sin 投影与分段限幅速度解算 4 轮速度，叠加每拍 ±20 加速斜率以平滑，并更新 <code class="inline">near_pos/in_pos</code> 标志。</p></div>
+  <div class="func"><div class="name">void visual_pos_adj(target,x,y,z) <span class="sig">void</span></div>
+    <p>视觉细闭环。将 Nano 给出的目标坐标与设定像素差的偏差转换为速度（vKp），按目标编号不同的死区/就位阈值累计 <code class="inline">delay_visual</code>，超阈值置 <code class="inline">v_in_pos=1</code>。</p></div>
+  <div class="func"><div class="name">void SetMotorVoltageAndDirection(m1..m4) <span class="sig">void</span></div>
+    <p>把四路目标速度编码为 8 字节驱动命令帧，经 UART4 依次发送给 4 台 42 闭环步进电机驱动器（含方向位）。</p>
+    <p class="meta">速度系数 0.238 把内部速度量映射为驱动器指令。</p></div>
+  <div class="func"><div class="name">void Chassis_task() <span class="sig">void (RTOS 主循环)</span></div>
+    <p>按 control_mode/chassis_mode 选择：场地环、视觉停机、或遥控 <code class="inline">chassis_RC()</code>，最后统一 <code class="inline">SetMotorVoltageAndDirection()</code> 输出，周期 5ms。</p></div>
+
+  <h3>塔吊 Tower_task.c / tower.c</h3>
+  <div class="func"><div class="name">void Tower_target_updata(radius,height,theta) <span class="sig">void</span></div>
+    <p>塔吊三轴目标：radius=28 吊臂、height=35 升降、theta=G6220 偏航角（单位：0.1°）。</p></div>
+  <div class="func"><div class="name">void Tower_task() <span class="sig">void (RTOS 主循环)</span></div>
+    <p>每 ~10ms 对三轴电机做位置控制。遥控模式下由 <code class="inline">RC_RX.KNOB</code> 直接映射到 28(伸缩) 与 35(升降)。</p></div>
+  <div class="func"><div class="name">void track_materials(color) <span class="sig">void</span></div>
+    <p>物料跟踪。利用 Nano 的物料像素偏移累加 <code class="inline">d_radius/d_X/d_Y</code> 逼近量（带限幅），并累计达到指定阈值后置 <code class="inline">t_in_pos=1</code>，配合底盘做动态抓取。</p></div>
+  <div class="func"><div class="name">塔吊动作函数族</div>
+    <p><code class="inline">grab_turntable_B</code>(物料台动态抓) / <code class="inline">grab_materials_ground</code>(地面抓) / <code class="inline">put_materials_ground</code>(地面放/码垛) / <code class="inline">grab_materials_car</code>(车上抓) / <code class="inline">put_materials_car(_right)</code>(车上放) / <code class="inline">put_block_turntable + put_turntable_action</code>(决赛转盘放)。每个动作 = 设置塔吊目标序列 + 阶段延时 + 夹爪开合（LFD_01M_* 宏）。</p></div>
+  <div class="func"><div class="name">void G6220_Position / Motor35_AbsPosition / Motor28_AbsPosition etc.</div>
+    <p>底层电机控制：G6220 用 float 弧度 + 速度经 CAN 发送；35 步进换算 <code class="inline">z*MOTOR35_Reduction</code> 脉冲数；28 步进换算 <code class="inline">y*MOTOR28_Reduction</code>，均含机械范围限幅（<code class="inline">claw_h_max/min, claw_r_max/min</code>）。</p></div>
+
+  <h3>位姿与视觉 position.c / visual_identity.c</h3>
+  <div class="func"><div class="name">void POS_Data_Unpack(rec[32]) <span class="sig">void</span></div>
+    <p>解析 OPS 28 字节帧（帧头 <code class="inline">0D 0A</code>、帧尾 <code class="inline">0A 0D</code>），用 union 把 24 字节直接映射为 6 个 float（zangle/xangle/yangle/pos_x/pos_y/w_z）。</p></div>
+  <div class="func"><div class="name">void Update_OPS / Update_X/Y/Z <span class="sig">void</span></div>
+    <p>通过 UART2 向 OPS 发送 <code class="inline">ACT0</code>(复位) 与 <code class="inline">ACTX/Y/J</code>+float 进行站位信息校准。光标坐标系更新用 Stract 拼接。</p></div>
+  <div class="func"><div class="name">void NANO_Data_Unpack(frame[16]) / OPENMV_Data_Unpack() <span class="sig">void</span></div>
+    <p>Nano 16 字节帧按首字节 <code class="inline">0x66</code>、尾校验 <code class="inline">0x77</code> 分 case 解包至 <code class="inline">VIS_RX</code>；二维码结果 case=9 写入 <code class="inline">color_task</code>。OPENMV 帧 <code class="inline">0x88</code> 起始、六数和=12，写 color_task。</p></div>
+
+  <h3>HDL 函数 (freertos.c / main.c)</h3>
+  <div class="func"><div class="name">void MX_FREERTOS_Init() </div>
+    <p>创建 3 条队列（各 4 元素、存指针）与 6 个任务线程。</p></div>
+  <div class="func"><div class="name">void USART2/5/1_DMAHandler()</div>
+    <p>三个串口共用的“空闲中断 + DMA”接收：IDLE 时停止 DMA、记录长度、投递缓冲指针到队列、轮转缓冲下标、重启 DMA。在 <code class="inline">USART2/5_IRQHandler / USART1_IRQHandler</code> 内被调用（stm32f4xx_it.c）。</p></div>
+
+  <!-- 7 通信 -->
+  <h2 class="sec" id="comms"><span class="no">07</span>通信接口与协议</h2>
+  <table>
+    <tr><th>接口</th><th>对象</th><th>方向/协议要点</th></tr>
+    <tr><td>USART1</td><td>视觉 Nano</td><td>MCU→Nano 4字节指令<code class="inline">[0x66, 任务码, 目标, 和校验]</code>；Nano→MCU 16字节帧<code class="inline">[0x66, case, data…, 0x77]</code>。任务码：0 空闲 / 1 物料盘 / 2 物料 / 3 色环 / 8 码垛色环 / 9 二维码 / 6 决赛放置 / 7 抓取指令。</td></tr>
+    <tr><td>USART2</td><td>OPS 定位</td><td>OPS→MCU 28字节位姿帧(<code class="inline">0D0A…0A0D</code>)→6 float；MCU→OPS 命令：<code class="inline">ACT0</code> 复位、<code class="inline">ACTX/Y/J</code>+float 坐标更新；printf 重定向到此。</td></tr>
+    <tr><td>UART4</td><td>底盘 4×步进电机</td><td>MCU→每台 8字节命令帧（含地址/方向/速度）。阻塞发送 4 条。</td></tr>
+    <tr><td>UART5</td><td>遥控接收机</td><td>16字节帧<code class="inline">[0xFA, 摇杆/旋钮/按键/拨杆…, 0xFB]</code>，解到 RC_DATA。</td></tr>
+    <tr><td>CAN1</td><td>塔吊电机</td><td>G6220 偏航（标准ID 0x100+trim 偏移 / 0x101 等，float 弧度+转速）、35 步进(ExtID 0x300)、28 步进(ExtID 0x400)。回零 <code class="inline">0x9A02 006B</code>；超 8 字节命令分包 <code class="inline">Can_SendCmd()</code>。</td></tr>
+    <tr><td>SPI1 / 软SPI</td><td>双 OLED</td><td>Output 用硬件 SPI1；Main 用 GPIO 拉时序软 SPI，均 1.3' 128×64。</td></tr>
+    <tr><td>GPIO/TIM1</td><td>I/O</td><td>LED_1/2/3(PB5/4/3)、蜂鸣器(PC0)、补光灯(PD1)、电机总开关VM_SW(PD0)、启动按键(PD3)；TIM1 CH1 输出 MG90 夹爪 PWM，不同 <code class="inline">LFD_01M_*</code> 开度对应不同开合幅度。</td></tr>
+  </table>
+
+  <!-- 8 中断 -->
+  <h2 class="sec" id="irq"><span class="no">08</span>中断与 DMA 机制</h2>
+  <ul class="tight">
+    <li><b>串口接收（空闲中断+DMA）：</b>USART1/2/5 各自映射 DMA 流：<code class="inline">UART5=DM1 Stream0</code>、<code class="inline">UART2=DM1 Stream5</code>、<code class="inline">UART1=DM2 Stream2</code>。IDLE 中断里停止 DMA → 记录长度 → 缓冲指针入队 → 轮转 → 重启 DMA；UART_RX_TASK 从队列取指针解包。</li>
+    <li><b>CAN1：</b><code class="inline">CAN_RxFifo0MsgPendingCallback</code> 读帧并交给 <code class="inline">Response_Handle()</code> 更新 <code class="inline">flag</code>（认证电机就位）。</li>
+    <li><b>时钟基：</b>TIM4 周期中断 → <code class="inline">HAL_IncTick()</code>；TIM2 用作延时（htim2，delay_us）。</li>
+    <li><b>系统时钟：</b>HSE 8MHz → PLL(4/168/2) → SYSCLK 168MHz，APB2/2、APB1/4。</li>
+  </ul>
+
+  <!-- 9 依赖 -->
+  <h2 class="sec" id="dep"><span class="no">09</span>依赖关系</h2>
+  <div class="card">
+  <p><b>模块调用方向（大致自上而下）：</b></p>
+  <div class="flow">
+    <span class="node accent">RTOS_APP</span><span class="arrow">── 调 ──▶</span><span class="node">USER_Code 驱动</span>
+  </div>
+  <div class="flow" style="justify-content:flex-start;white-space:nowrap;">
+    <span class="node">Main_task</span><span class="arrow">→</span><span class="node" style="background:#1f6feb">Chassis_task</span>
+    <span class="arrow">→</span><span class="node" style="background:#1f6feb">Tower_task</span>
+    <span class="arrow">→</span><span class="node" style="background:#334155">position/chassis_control/visual_identity/tower</span>
+    <span class="arrow">→</span><span class="node dark">HAL 外设</span>
+  </div>
+  <ul class="tight" style="margin-top:12px;">
+    <li><code class="inline">Chassis_task</code> 依赖 <code class="inline">chassis_control</code>(运动学)、<code class="inline">position</code>(OPS)、<code class="inline">visual_identity</code>(视觉)、<code class="inline">io_devices</code>(LED/蜂鸣)。</li>
+    <li><code class="inline">Tower_task</code> 依赖 <code class="inline">tower</code>(电机) + <code class="inline">hcan</code>(CAN发送) + <code class="inline">chassis_control</code>(d_X/d_Y 逼近量联动) + <code class="inline">chassis_move</code>(底盘合作抓取)。</li>
+    <li><code class="inline">Output_task</code> 依赖 OLED_SPI 与 <code class="inline">chassis_control</code>(pos_x/pos_y)。</li>
+    <li><code class="inline">Main_task</code> 是唯一定点调用所有动作函数的编排者（依赖 Output/Chassis/Tower 头文件）。</li>
+    <li>全局共享数据（<code class="inline">VIS_RX, RC_RX, SpeedTarget, pos_*, color_task, ready, chassis_mode, control_mode</code>）在多个任务间交叉读写——这是协作（非消息传递）的核心耦合点。</li>
+  </ul>
+  </div>
+
+  <!-- 10 流程 -->
+  <h2 class="sec" id="flow"><span class="no">10</span>比赛作业流程</h2>
+  <p>（以默认预赛代码 <code class="inline">__PRELIMINARY_ROUND__</code> 为例，<code class="inline">while(1)</code> 内两轮循环）</p>
+  <div class="flow">
+    <span class="node dark">启动按键</span><span class="arrow">→</span>
+    <span class="node accent">出库 150,165</span><span class="arrow">→</span>
+    <span class="node">扫码 730,135</span><span class="arrow">→</span>
+    <span class="node accent">Get_Task_Code 取任务色序</span><span class="arrow">→</span>
+    <span class="node">T1路口 → 粗加工区</span><span class="arrow">→</span>
+    <span class="node accent">视觉微调 Chassis_Visual_Pos</span><span class="arrow">→</span>
+    <span class="node">地面抓→车上放 ×3</span><span class="arrow">→</span>
+    <span class="node">码垛区 色环校准</span><span class="arrow">→</span>
+    <span class="node accent">车上抓→地面放/码垛 ×3</span><span class="arrow">→</span>
+    <span class="node">回物料台 转盘放置 ×3</span><span class="arrow">→</span>
+    <span class="node dark">回库 0,0 停机</span>
+  </div>
+  <div class="boxed warn"><b>说明：</b>决赛分支(<code class="inline">#else</code>)增加了 <code class="inline">put_block_turntable</code> 转盘放置与不同的视觉目标号(物料盘 final / block_order)。所有路径坐标均为场地绝对坐标（mm/度）。</div>
+
+  <!-- 11 版本 -->
+  <h2 class="sec" id="version"><span class="no">11</span>版本历史（Main_task.c 注释）</h2>
+  <table>
+    <tr><th>版本</th><th>要点</th></tr>
+    <tr><td>V2.6.1</td><td>解决位置环抖动、删除无效代码、改限幅、动作时间微调</td></tr>
+    <tr><td>V2.6.2</td><td>重调塔吊、优化出界问题、提速至 2 分 15 秒</td></tr>
+    <tr><td>V2.6.3</td><td>加入决赛代码</td></tr>
+    <tr><td>V2.6.4</td><td>决赛抓取物料</td></tr>
+    <tr><td>V2.6.5</td><td>扫码超时处理、变量整理、决赛物料台放置</td></tr>
+    <tr><td>V2.7.4</td><td>加入二次校准、决赛夹爪规划补偿</td></tr>
+  </table>
+
+  <!-- 12 构建 -->
+  <h2 class="sec" id="build"><span class="no">12</span>构建与运行</h2>
+  <div class="card">
+    <h3>环境要求</h3>
+    <ul class="tight">
+      <li>Keil MDK-ARM（建议 UV5 及配套 ARM Compiler V5）</li>
+      <li>STM32F4xx 器件支持包（Pack）</li>
+      <li>下载器：ST-Link / J-Link 通过 SWD 接口</li>
+    </ul>
+    <h3>步骤</h3>
+    <ol class="tight">
+      <li>用 Keil 打开 <code class="inline">MDK-ARM/Logistics_Vehicle_F407.uvprojx</code>。</li>
+      <li>在工程选项选择目标设备 <span class="kbd">STM32F407VETx</span>，确认使用 AC5（V5）编译器 —— <code class="inline">Readme.txt</code> 提示因 FreeRTOS 兼容性需用 V5。</li>
+      <li>点击 <span class="kbd">Build (F7)</span> 编译；若使用其他主频/时钟注意 <code class="inline">SystemClock_Config()</code>（HSE→168MHz）。</li>
+      <li><span class="kbd">Download (F8)</span> 烧录，后复位运行。</li>
+      <li>上电后 OLED 显示版本；等待 <code class="inline">ready</code> 就绪（或遥控按键 L2 跳过等待 / 按启动按键），随后进入比赛流程或遥控模式。</li>
+    </ol>
+    <div class="boxed"><b>运行提示：</b>开发调试时可先以遥控模式（拨杆 L1）验证底盘/塔吊/夹爪，再切换自动模式跑完整流程。电机总开关必须先 <code class="inline">VM_ON()</code>（<code class="inline">Motor_Init</code> 中已调用）。</div>
+  </div>
+
+  <p style="color:var(--muted);font-size:12.5px;margin-top:40px;">本 Wiki 依据仓库源码自动生成，仅供学习理解；具体参数与点位以实际 <code class="inline">Main_task/V2.7.4</code> 及机械图纸为准。</p>
+
+</main>
+</body>
+</html>
